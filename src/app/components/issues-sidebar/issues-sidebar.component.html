@@ -1,0 +1,73 @@
+<aside class="issues-sidebar"
+       [class.collapsed]="isCollapsed"
+       #sidebar>
+
+  <!-- Toggle Button - Always visible -->
+  <button class="sidebar-toggle"
+          (click)="toggleSidebar()"
+          [title]="isCollapsed ? 'Expand Issues' : 'Collapse Issues'"
+          #toggleBtn>
+    <mat-icon class="toggle-icon">{{ isCollapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+    <span class="toggle-badge" *ngIf="isCollapsed && getAttentionCount() > 0">
+      {{ getAttentionCount() }}
+    </span>
+  </button>
+
+  <!-- Sidebar Content -->
+  <div class="sidebar-content" #sidebarContent>
+
+    <!-- Header -->
+    <div class="sidebar-header" #sidebarHeader>
+      <div class="header-icon">
+        <mat-icon class="warning-icon">warning</mat-icon>
+      </div>
+      <div class="header-content">
+        <h2 class="sidebar-title">Issues</h2>
+        <p class="sidebar-subtitle">Requires attention</p>
+      </div>
+      <div class="issue-count-badge" *ngIf="getAttentionCount() > 0">
+        {{ getAttentionCount() }}
+      </div>
+    </div>
+
+    <!-- Issues List -->
+    <div class="issues-list" #issuesList>
+
+      <!-- Issues Requiring Attention -->
+      <div *ngFor="let issue of issuesRequiringAttention; let i = index"
+           class="issue-card"
+           (click)="openIssue(issue.issueKey, $event)"
+           [style.animation-delay]="(i * 0.05) + 's'">
+
+        <div class="issue-header">
+          <span class="issue-key">{{ issue.issueKey }}</span>
+          <span class="issue-status incomplete">INCOMPLETE</span>
+        </div>
+
+        <div class="issue-title">{{ issue.issueSummary }}</div>
+
+        <!-- Validation Issues -->
+        <div class="validation-issues">
+          <div *ngFor="let validationIssue of issue.issues" class="validation-item">
+            <mat-icon class="validation-icon">error_outline</mat-icon>
+            <span class="validation-text">{{ validationIssue.message }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="issuesRequiringAttention.length === 0" class="empty-state">
+        <mat-icon class="empty-icon">check_circle</mat-icon>
+        <h3 class="empty-title">All Clear!</h3>
+        <p class="empty-text">No issues require attention</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="collapsed-strip" #collapsedStrip>
+    <div class="strip-icon">
+    </div>
+  </div>
+
+</aside>

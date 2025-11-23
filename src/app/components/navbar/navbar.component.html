@@ -1,0 +1,73 @@
+<nav class="floating-navbar"
+     #navbar
+     [class.collapsed]="isCollapsed"
+     (mouseenter)="onMouseEnter()"
+     (mouseleave)="onMouseLeave()">
+  <div class="navbar-container">
+    <!-- Burger Icon - Always visible -->
+    <div class="burger-icon">
+      <mat-icon>menu</mat-icon>
+    </div>
+
+    <!-- Logo - Animated with GSAP -->
+    <div class="logo" #logo>
+      <img src="omnisys.svg" alt="Omnisys" class="logo-img" #logoImg>
+      <span class="logo-text" #logoText>Omnisys</span>
+    </div>
+
+    <!-- Navigation Menu - Animated with GSAP -->
+    <div class="nav-menu-wrapper" #menuWrapper>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a routerLink="/" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <mat-icon class="nav-icon">home</mat-icon>
+            <span class="nav-text">Home</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/dashboard" class="nav-link" routerLinkActive="active">
+            <mat-icon class="nav-icon">dashboard</mat-icon>
+            <span class="nav-text">Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link">
+            <mat-icon class="nav-icon">settings</mat-icon>
+            <span class="nav-text">Settings</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <div class="theme-toggle-wrapper">
+            <button
+              class="theme-toggle-switch"
+              [class.dark]="isDarkMode"
+              (click)="toggleTheme()"
+              [title]="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+              [attr.aria-label]="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+              <div class="theme-toggle-slider">
+                <mat-icon>{{ isDarkMode ? 'dark_mode' : 'light_mode' }}</mat-icon>
+              </div>
+            </button>
+          </div>
+        </li>
+        @if (isAuthenticated && currentUser) {
+          <li class="nav-item user-info">
+            <div class="user-profile">
+              <img
+                [src]="currentUser.avatarUrl || 'https://ui-avatars.com/api/?name=' + currentUser.displayName + '&background=6366f1&color=fff'"
+                [alt]="currentUser.displayName"
+                class="user-avatar">
+              <span class="user-name">{{ currentUser.displayName }}</span>
+            </div>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link logout-btn" (click)="logout()">
+              <mat-icon class="nav-icon">logout</mat-icon>
+              <span class="nav-text">Logout</span>
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</nav>

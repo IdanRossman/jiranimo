@@ -1,0 +1,19 @@
+<div class="hero-left">
+  <h1 class="hero-title" #heroTitle>Welcome to Jiranimo</h1>
+  
+  <div class="feature-showcase">
+    <h2 class="feature-text">
+      <span class="feature-text-content">{{ currentFeature }}</span>
+    </h2>
+    <p class="feature-description">{{ currentFeatureDescription }}</p>
+  </div>
+
+  <div class="cta-buttons">
+    <app-glass-button variant="primary" (clicked)="goToDashboard()">
+      {{ isAuthenticated ? 'Go to Dashboard' : 'Get Started' }}
+    </app-glass-button>
+    <app-glass-button variant="secondary" (clicked)="learnMore()">
+      Learn More
+    </app-glass-button>
+  </div>
+</div>

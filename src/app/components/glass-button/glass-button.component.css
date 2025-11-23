@@ -1,0 +1,183 @@
+/* iOS Glass Button Base */
+.glass-btn {
+  position: relative;
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+
+  /* Glassmorphism effect */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  /* Prevent text selection */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.glass-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(145deg,
+    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.05)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Shine effect on hover */
+.glass-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+  pointer-events: none;
+}
+
+.glass-btn:hover::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Primary Variant - Vibrant Glass */
+.glass-btn-primary {
+  background: rgba(102, 126, 234, 0.85);
+  color: white;
+  box-shadow:
+    0 8px 32px rgba(102, 126, 234, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.glass-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 40px rgba(102, 126, 234, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: rgba(102, 126, 234, 0.95);
+}
+
+.glass-btn-primary:active {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 16px rgba(102, 126, 234, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Secondary Variant - Subtle Glass */
+.glass-btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--primary-600);
+  border: 1.5px solid rgba(102, 126, 234, 0.3);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.glass-btn-secondary:hover {
+  background: rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.5);
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 32px rgba(102, 126, 234, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.glass-btn-secondary:active {
+  transform: translateY(0);
+  box-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Dark theme adjustments */
+:host-context(.dark-theme) .glass-btn-primary {
+  background: rgba(100, 181, 246, 0.75);
+  box-shadow:
+    0 8px 32px rgba(100, 181, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+:host-context(.dark-theme) .glass-btn-primary:hover {
+  background: rgba(100, 181, 246, 0.9);
+  box-shadow:
+    0 12px 40px rgba(100, 181, 246, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+:host-context(.dark-theme) .glass-btn-primary:active {
+  box-shadow:
+    0 4px 16px rgba(100, 181, 246, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+:host-context(.dark-theme) .glass-btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #64b5f6;
+  border-color: rgba(100, 181, 246, 0.3);
+}
+
+:host-context(.dark-theme) .glass-btn-secondary:hover {
+  background: rgba(100, 181, 246, 0.15);
+  border-color: rgba(100, 181, 246, 0.5);
+}
+
+:host-context(.dark-theme) .glass-btn-secondary:active {
+  box-shadow:
+    0 2px 12px rgba(100, 181, 246, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Icon styling */
+.btn-icon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.glass-btn:hover .btn-icon {
+  transform: scale(1.1);
+}
+
+/* Disabled state */
+.glass-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.glass-btn:disabled:hover::after {
+  width: 0;
+  height: 0;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+  .glass-btn {
+    padding: 0.75rem 1.75rem;
+    font-size: 0.95rem;
+  }
+}

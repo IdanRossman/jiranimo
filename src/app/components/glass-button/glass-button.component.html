@@ -1,0 +1,9 @@
+<button
+  class="glass-btn"
+  [class.glass-btn-primary]="variant === 'primary'"
+  [class.glass-btn-secondary]="variant === 'secondary'"
+  [disabled]="disabled"
+  (click)="onClick()">
+  <span *ngIf="icon" class="btn-icon">{{ icon }}</span>
+  <ng-content></ng-content>
+</button>

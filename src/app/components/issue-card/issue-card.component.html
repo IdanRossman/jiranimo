@@ -1,0 +1,72 @@
+<div class="issue-card glass-card" (click)="onCardClick($event)">
+  <!-- Issue Header -->
+  <div class="issue-header">
+    <span class="issue-key">{{ issue.key }}</span>
+    <span
+      class="issue-priority"
+      [style.color]="getPriorityColor(issue.priority?.name || 'No Priority')">
+      {{ issue.priority?.name || 'No Priority' }}
+    </span>
+  </div>
+
+  <!-- Issue Title -->
+  <h3 class="issue-title">{{ issue.summary }}</h3>
+
+  <!-- Issue Meta -->
+  <div class="issue-meta">
+    <div class="meta-item">
+      <span class="meta-icon">📁</span>
+      <span>{{ issue.project.key }}</span>
+    </div>
+
+    <div class="meta-item">
+      <span
+        class="status-badge"
+        [style.background-color]="getStatusColor(issue.status.categoryKey)">
+        {{ issue.status.name }}
+      </span>
+    </div>
+
+    <div class="meta-item" *ngIf="showEpic && issue.epic">
+      <span class="epic-badge" [style.border-color]="issue.epic.color">
+        {{ issue.epic.name }}
+      </span>
+    </div>
+
+    <div class="meta-item" *ngIf="issue.storyPoints">
+      <span class="meta-icon">🎯</span>
+      <span>{{ issue.storyPoints }} pts</span>
+    </div>
+  </div>
+
+  <!-- Issue Footer -->
+  <div class="issue-footer">
+    <div class="assignee" *ngIf="issue.assignee">
+      <img
+        [src]="issue.assignee.avatarUrl"
+        [alt]="issue.assignee.displayName"
+        class="avatar">
+      <span>{{ issue.assignee.displayName }}</span>
+    </div>
+
+    <div class="labels" *ngIf="issue.labels.length > 0">
+      <span *ngFor="let label of issue.labels.slice(0, 2)" class="label">
+        {{ label }}
+      </span>
+      <span *ngIf="issue.labels.length > 2" class="label-more">
+        +{{ issue.labels.length - 2 }}
+      </span>
+    </div>
+
+    <div class="subtasks" *ngIf="issue.subtasks && issue.subtasks.length > 0">
+      <span class="meta-icon">📋</span>
+      <span>{{ issue.subtasks.length }} subtasks</span>
+    </div>
+  </div>
+
+  <!-- Due Date (if exists and not done) -->
+  <div class="issue-duedate" *ngIf="issue.dueDate && issue.status.categoryKey !== 'done'">
+    <span class="meta-icon">📅</span>
+    <span>Due: {{ issue.dueDate | date:'MMM d, y' }}</span>
+  </div>
+</div>

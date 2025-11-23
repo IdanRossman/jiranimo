@@ -1,0 +1,65 @@
+<aside class="ai-chat-sidebar"
+       [class.collapsed]="isCollapsed"
+       #sidebar>
+
+  <!-- Toggle Button - Always visible -->
+  <button class="sidebar-toggle"
+          (click)="toggleSidebar()"
+          [title]="isCollapsed ? 'Expand AI Chat' : 'Collapse AI Chat'"
+          #toggleBtn>
+    <mat-icon class="toggle-icon">{{ isCollapsed ? 'chevron_left' : 'chevron_right' }}</mat-icon>
+  </button>
+
+  <!-- Sidebar Content -->
+  <div class="sidebar-content" #sidebarContent>
+
+    <!-- Header -->
+    <div class="sidebar-header" #sidebarHeader>
+      <div class="header-icon">
+        <mat-icon class="ai-icon">smart_toy</mat-icon>
+      </div>
+      <div class="header-content">
+        <h2 class="sidebar-title">AI Chat</h2>
+        <p class="sidebar-subtitle">Coming soon</p>
+      </div>
+    </div>
+
+    <!-- Chat Content Placeholder -->
+    <div class="chat-content" #chatContent>
+
+      <!-- Placeholder State -->
+      <div class="placeholder-state">
+        <mat-icon class="placeholder-icon">psychology</mat-icon>
+        <h3 class="placeholder-title">AI Assistant</h3>
+        <p class="placeholder-text">Chat with AI to get insights about your Jira issues, sprint progress, and project analytics.</p>
+
+        <div class="coming-soon-badge">
+          <mat-icon>schedule</mat-icon>
+          <span>Coming Soon</span>
+        </div>
+
+        <div class="feature-list">
+          <div class="feature-item">
+            <mat-icon class="feature-icon">chat</mat-icon>
+            <span>Natural language queries</span>
+          </div>
+          <div class="feature-item">
+            <mat-icon class="feature-icon">insights</mat-icon>
+            <span>Smart issue analysis</span>
+          </div>
+          <div class="feature-item">
+            <mat-icon class="feature-icon">auto_awesome</mat-icon>
+            <span>Automated suggestions</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="collapsed-strip" #collapsedStrip>
+    <div class="strip-icon">
+    </div>
+  </div>
+
+</aside>

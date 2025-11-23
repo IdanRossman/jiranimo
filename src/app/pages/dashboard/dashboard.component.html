@@ -1,0 +1,304 @@
+<div class="dashboard-container"
+     [class.sidebar-collapsed]="sidebarCollapsed"
+     [class.ai-sidebar-collapsed]="aiChatSidebarCollapsed"
+     [class.loaded]="dashboardLoaded">
+  <!-- Issues Sidebar (Left) -->
+  <app-issues-sidebar
+    [issuesRequiringAttention]="issuesRequiringAttention"
+    (collapsedChange)="onSidebarCollapsedChange($event)">
+  </app-issues-sidebar>
+
+  <!-- AI Chat Sidebar (Right) -->
+  <app-ai-chat-sidebar
+    (collapsedChange)="onAiChatSidebarCollapsedChange($event)">
+  </app-ai-chat-sidebar>
+
+
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading your issues...</p>
+  </div>
+
+  <!-- Kanban Board -->
+  <section class="kanban-section" *ngIf="!loading">
+    <!-- All Filters Inline -->
+    <div class="search-filter-bar">
+      <!-- Search Input -->
+      <div class="filter-control-wrapper">
+        <label class="filter-label">Search</label>
+        <div class="search-glass-bar">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search issues..."
+          [(ngModel)]="searchQuery"
+          (input)="onSearchChange()">
+        <button *ngIf="searchQuery" class="search-clear" (click)="clearSearch()">
+          <mat-icon>close</mat-icon>
+        </button>
+        </div>
+      </div>
+
+      <!-- Priority Filter -->
+      <div class="filter-control-wrapper">
+        <label class="filter-label">Priority</label>
+        <div class="filter-glass-chip">
+        <mat-icon class="filter-chip-icon">flag</mat-icon>
+        <select class="filter-select" [(ngModel)]="selectedPriority" (change)="onFilterChange()">
+          <option value="">All Priorities</option>
+          <option *ngFor="let priority of availablePriorities" [value]="priority">{{ priority }}</option>
+        </select>
+        </div>
+      </div>
+
+      <!-- Type Filter -->
+      <div class="filter-control-wrapper">
+        <label class="filter-label">Type</label>
+        <div class="filter-glass-chip">
+        <mat-icon class="filter-chip-icon">label</mat-icon>
+        <select class="filter-select" [(ngModel)]="selectedType" (change)="onFilterChange()">
+          <option value="">All Types</option>
+          <option *ngFor="let type of availableTypes" [value]="type">{{ type }}</option>
+        </select>
+        </div>
+      </div>
+      <!-- Projects Filter -->
+      <div class="filter-control-wrapper">
+        <label class="filter-label">Projects</label>
+        <div class="project-filter-glass-container">
+          <button
+            *ngFor="let project of projects"
+            class="project-filter-chip-inline"
+            [class.active]="project.visible"
+            [style.--project-color]="project.color"
+            [style.--project-color-rgb]="hexToRgb(project.color)"
+            (click)="toggleProjectVisibility(project.key)">
+            <span class="project-dot" [style.background-color]="project.color"></span>
+            <span class="project-label">{{ project.name }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="filters-board-divider"></div>
+
+    <!-- Kanban Board -->
+    <div class="kanban-board" cdkDropListGroup>
+      <div
+        *ngFor="let column of kanbanColumns"
+        class="kanban-column"
+        [attr.data-column-id]="column.id"
+        cdkDropList
+        [cdkDropListData]="column.issues"
+        (cdkDropListDropped)="onDrop($event)">
+        
+        <!-- Column Header -->
+        <div class="column-header">
+          <h3 class="column-title">{{ column.title }}</h3>
+          <span class="column-count">{{ column.issues.length }}</span>
+        </div>
+
+        <!-- Issue Cards -->
+        <div class="column-content">
+          <div
+            *ngFor="let issue of column.issues"
+            class="kanban-card"
+            [style.--project-color]="getProjectColor(issue)"
+            [style.--project-color-rgb]="getProjectColorRgb(issue)"
+            cdkDrag>
+            
+            <!-- Drag Placeholder -->
+            <div class="kanban-card-placeholder" *cdkDragPlaceholder></div>
+
+            <!-- Card Content -->
+            <div class="card-header">
+              <span class="issue-key">{{ issue.key }}</span>
+              <span class="issue-priority" [style.color]="getPriorityColor(issue.priority?.name || 'Medium')">
+                {{ issue.priority?.name || 'Medium' }}
+              </span>
+            </div>
+
+            <h4 class="issue-summary">{{ issue.summary }}</h4>
+
+            <div class="card-footer">
+              <span class="project-tag" [style.background-color]="getProjectColor(issue)">
+                {{ issue.project.key }}
+              </span>
+              <span class="issue-type">{{ issue.type.name }}</span>
+            </div>
+          </div>
+
+          <!-- Empty Column State -->
+          <div *ngIf="column.issues.length === 0" class="empty-column">
+            <mat-icon class="empty-icon">inbox</mat-icon>
+            <p>No issues</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Issue Groups - Nested (Epic View) - HIDDEN FOR NOW -->
+  <section class="issues-section" *ngIf="false && !loading && groupBy === 'epic'">
+
+    <div *ngFor="let epicName of getObjectKeys(nestedIssues)" class="epic-group">
+      <div class="epic-header">
+        <h2 class="epic-title">{{ epicName }}</h2>
+        <span class="epic-count">{{ getEpicTotalCount(epicName) }} issues</span>
+      </div>
+
+      <!-- Issue Types within Epic -->
+      <div *ngFor="let issueType of getObjectKeys(nestedIssues[epicName])" class="type-group">
+        <div class="type-header">
+          <h3 class="type-title">{{ issueType }}s</h3>
+          <span class="type-count">{{ nestedIssues[epicName][issueType].length }}</span>
+        </div>
+
+        <div class="issues-grid">
+          <app-issue-card
+            *ngFor="let issue of nestedIssues[epicName][issueType]"
+            [issue]="issue"
+            [showEpic]="false"
+            (issueClick)="openIssueDetail($event.issue, $event.event)">
+          </app-issue-card>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Issue Groups - Regular (Status/Project/Priority View) -->
+  <section class="issues-section" *ngIf="!loading && groupBy !== 'epic'">
+    <div *ngFor="let group of getObjectKeys(issuesByStatus)" class="issue-group">
+      <div class="group-header">
+        <h2>{{ group }}</h2>
+        <span class="group-count">{{ issuesByStatus[group].length }}</span>
+      </div>
+
+      <div class="issues-grid">
+        <app-issue-card
+          *ngFor="let issue of issuesByStatus[group]"
+          [issue]="issue"
+          [showEpic]="true"
+          (issueClick)="openIssueDetail($event.issue, $event.event)">
+        </app-issue-card>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="allIssues.length === 0" class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h2>No issues found</h2>
+      <p>You don't have any issues assigned to you.</p>
+    </div>
+  </section>
+
+  <!-- Issue Detail Modal -->
+  <div *ngIf="showDetailModal && selectedIssue" class="modal-overlay"
+       [class.modal-opening]="modalAnimationState === 'opening'"
+       [class.modal-closing]="modalAnimationState === 'closing'"
+       (click)="closeIssueDetail()">
+    <div class="modal-content glass-card"
+         [class.modal-opening]="modalAnimationState === 'opening'"
+         [class.modal-open]="modalAnimationState === 'open'"
+         [class.modal-closing]="modalAnimationState === 'closing'"
+         [style.--card-top.px]="cardPosition?.top"
+         [style.--card-left.px]="cardPosition?.left"
+         [style.--card-width.px]="cardPosition?.width"
+         [style.--card-height.px]="cardPosition?.height"
+         (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title-section">
+          <span class="modal-issue-key">{{ selectedIssue.key }}</span>
+          <h2 class="modal-title">{{ selectedIssue.summary }}</h2>
+        </div>
+        <button class="modal-close" (click)="closeIssueDetail()">×</button>
+      </div>
+
+      <!-- Modal Actions -->
+      <div class="modal-actions">
+        <app-glass-button
+          variant="primary"
+          (click)="openInJira(selectedIssue)">
+          Open in Jira
+        </app-glass-button>
+        <div class="modal-meta">
+          <span class="meta-badge" [style.background-color]="getStatusColor(selectedIssue.status.categoryKey)">
+            {{ selectedIssue.status.name }}
+          </span>
+          <span class="meta-badge priority" [style.color]="getPriorityColor(selectedIssue.priority?.name || 'No Priority')">
+            {{ selectedIssue.priority?.name || 'No Priority' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <!-- Description -->
+        <div class="detail-section" *ngIf="selectedIssue.description">
+          <h3 class="section-title">Description</h3>
+          <p class="section-content">{{ getDescriptionText(selectedIssue.description) }}</p>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="detail-section">
+          <h3 class="section-title">Details</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Project:</span>
+              <span class="detail-value">{{ selectedIssue.project.name }}</span>
+            </div>
+            <div class="detail-item" *ngIf="selectedIssue.epic">
+              <span class="detail-label">Epic:</span>
+              <span class="detail-value">{{ selectedIssue.epic.name }}</span>
+            </div>
+            <div class="detail-item" *ngIf="selectedIssue.assignee">
+              <span class="detail-label">Assignee:</span>
+              <span class="detail-value">{{ selectedIssue.assignee.displayName }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Reporter:</span>
+              <span class="detail-value">{{ selectedIssue.reporter.displayName }}</span>
+            </div>
+            <div class="detail-item" *ngIf="selectedIssue.storyPoints">
+              <span class="detail-label">Story Points:</span>
+              <span class="detail-value">{{ selectedIssue.storyPoints }}</span>
+            </div>
+            <div class="detail-item" *ngIf="selectedIssue.dueDate">
+              <span class="detail-label">Due Date:</span>
+              <span class="detail-value">{{ selectedIssue.dueDate | date:'MMM d, y' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtasks -->
+        <div class="detail-section" *ngIf="selectedIssue.subtasks && selectedIssue.subtasks.length > 0">
+          <h3 class="section-title">Subtasks ({{ selectedIssue.subtasks.length }})</h3>
+          <div class="subtask-list">
+            <div *ngFor="let subtask of selectedIssue.subtasks" class="subtask-item">
+              <span class="subtask-key">{{ subtask.key }}</span>
+              <span class="subtask-summary">{{ subtask.summary }}</span>
+              <span class="subtask-status" [style.background-color]="getStatusColor(subtask.status.categoryKey)">
+                {{ subtask.status.name }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Labels -->
+        <div class="detail-section" *ngIf="selectedIssue.labels && selectedIssue.labels.length > 0">
+          <h3 class="section-title">Labels</h3>
+          <div class="labels-list">
+            <span *ngFor="let label of selectedIssue.labels" class="label-tag">
+              {{ label }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
