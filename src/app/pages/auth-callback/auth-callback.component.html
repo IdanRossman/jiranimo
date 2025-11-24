@@ -1,11 +1,10 @@
 <div class="callback-container">
   <div class="callback-content glass-card">
     @if (loading) {
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <h2>Connecting to Jira...</h2>
-        <p>Please wait while we complete the authentication</p>
-      </div>
+      <app-loading-spinner
+        message="Connecting to Jira... Please wait while we complete the authentication"
+        size="large">
+      </app-loading-spinner>
     }
 
     @if (error) {

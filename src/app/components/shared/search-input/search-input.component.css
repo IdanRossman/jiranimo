@@ -1,0 +1,85 @@
+.search-glass-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.15) 0%, 
+    rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 100px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex: 1;
+  min-width: 250px;
+}
+
+.search-glass-bar:focus-within {
+  border-color: rgba(102, 126, 234, 0.5);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 4px 16px rgba(0, 0, 0, 0.05),
+    0 0 0 3px rgba(102, 126, 234, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.search-icon {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  opacity: 0.7;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  min-width: 150px;
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.search-clear {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.search-clear mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary);
+}
+
+.search-clear:hover {
+  background: rgba(220, 38, 38, 0.15);
+  border-color: rgba(220, 38, 38, 0.3);
+  transform: scale(1.1);
+}
+
+.search-clear:hover mat-icon {
+  color: #dc2626;
+}

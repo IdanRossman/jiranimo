@@ -1,0 +1,26 @@
+<div class="filter-glass-chip" [class.open]="isOpen">
+  <mat-icon class="filter-chip-icon">{{ icon }}</mat-icon>
+  
+  <div class="filter-trigger" (click)="toggleDropdown($event)">
+    <span class="filter-value">{{ displayValue }}</span>
+    <mat-icon class="chevron-icon" [class.rotated]="isOpen">expand_more</mat-icon>
+  </div>
+
+  <div class="filter-dropdown" *ngIf="isOpen" (click)="$event.stopPropagation()">
+    <div 
+      class="filter-option"
+      [class.selected]="isSelected('')"
+      (click)="selectOption('', $event)">
+      <mat-icon class="check-icon" *ngIf="multiselect && isSelected('')">check</mat-icon>
+      {{ placeholder }}
+    </div>
+    @for (option of options; track option.value) {
+      <div class="filter-option"
+      [class.selected]="isSelected(option.value)"
+      (click)="selectOption(option.value, $event)">
+      <mat-icon class="check-icon" *ngIf="multiselect && isSelected(option.value)">check</mat-icon>
+      {{ option.label }}
+      </div>
+    }
+  </div>
+</div>

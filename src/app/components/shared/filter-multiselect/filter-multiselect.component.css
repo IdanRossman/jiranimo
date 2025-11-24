@@ -1,0 +1,210 @@
+.filter-glass-chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.15) 0%, 
+    rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 100px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.filter-glass-chip.open {
+  border-color: rgba(102, 126, 234, 0.5);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 4px 16px rgba(0, 0, 0, 0.05),
+    0 0 0 3px rgba(102, 126, 234, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  border-radius: 16px 16px 0 0;
+  z-index: 10000;
+}
+
+.filter-chip-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: rgba(255, 255, 255, 0.7);
+  flex-shrink: 0;
+}
+
+.filter-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  cursor: pointer;
+}
+
+.filter-value {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 120px;
+}
+
+.chevron-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chevron-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.filter-dropdown {
+  position: absolute;
+  top: calc(100% - 1px);
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, 
+    rgba(30, 30, 40, 0.98) 0%, 
+    rgba(20, 20, 30, 0.98) 100%);
+  backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid rgba(102, 126, 234, 0.5);
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 
+    0 12px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 3px rgba(102, 126, 234, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  z-index: 10001;
+  max-height: 300px;
+  overflow-y: auto;
+  animation: slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark theme support */
+:host-context(.dark-theme) .filter-dropdown {
+  background: linear-gradient(135deg, 
+    rgba(30, 30, 40, 0.98) 0%, 
+    rgba(20, 20, 30, 0.98) 100%);
+}
+
+/* Light theme support */
+:host-context(.light-theme) .filter-dropdown,
+:host-context(:not(.dark-theme)) .filter-dropdown {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.98) 0%, 
+    rgba(245, 245, 250, 0.98) 100%);
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filter-option {
+  padding: 12px 20px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Dark theme */
+:host-context(.dark-theme) .filter-option {
+  color: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Light theme */
+:host-context(.light-theme) .filter-option,
+:host-context(:not(.dark-theme)) .filter-option {
+  color: rgba(0, 0, 0, 0.8);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.filter-option:last-child {
+  border-bottom: none;
+}
+
+.filter-option:hover {
+  background: linear-gradient(135deg, 
+    rgba(102, 126, 234, 0.15) 0%, 
+    rgba(102, 126, 234, 0.08) 100%);
+  color: var(--text-primary);
+}
+
+/* Dark theme hover */
+:host-context(.dark-theme) .filter-option:hover {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* Light theme hover */
+:host-context(.light-theme) .filter-option:hover,
+:host-context(:not(.dark-theme)) .filter-option:hover {
+  color: rgba(0, 0, 0, 0.95);
+}
+
+.filter-option.selected {
+  background: linear-gradient(135deg, 
+    rgba(102, 126, 234, 0.25) 0%, 
+    rgba(102, 126, 234, 0.15) 100%);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Dark theme selected */
+:host-context(.dark-theme) .filter-option.selected {
+  color: rgba(255, 255, 255, 1);
+}
+
+/* Light theme selected */
+:host-context(.light-theme) .filter-option.selected,
+:host-context(:not(.dark-theme)) .filter-option.selected {
+  color: rgba(0, 0, 0, 1);
+}
+
+.check-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: rgba(102, 126, 234, 1);
+  flex-shrink: 0;
+}
+
+/* Custom scrollbar for dropdown */
+.filter-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filter-dropdown::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.filter-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.3);
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.filter-dropdown::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.5);
+}

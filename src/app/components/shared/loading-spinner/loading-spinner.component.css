@@ -1,0 +1,70 @@
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.spinner-logo {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1rem;
+  animation: spinPulse 2s ease-in-out infinite;
+}
+
+.size-small .spinner-logo {
+  width: 40px;
+  height: 40px;
+}
+
+.size-large .spinner-logo {
+  width: 80px;
+  height: 80px;
+}
+
+.bro-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.4));
+}
+
+@keyframes spinPulse {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+    filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.4));
+  }
+  25% {
+    transform: rotate(90deg) scale(1.1);
+    filter: drop-shadow(0 0 16px rgba(102, 126, 234, 0.6));
+  }
+  50% {
+    transform: rotate(180deg) scale(1);
+    filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.4));
+  }
+  75% {
+    transform: rotate(270deg) scale(1.1);
+    filter: drop-shadow(0 0 16px rgba(102, 126, 234, 0.6));
+  }
+}
+
+.loading-message {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0;
+  text-align: center;
+}
+
+.size-small .loading-message {
+  font-size: 0.875rem;
+}
+
+.size-large .loading-message {
+  font-size: 1.125rem;
+}
+
+/* Dark theme adjustments */
+:host-context(.dark-theme) .loading-message {
+  color: var(--text-secondary);
+}

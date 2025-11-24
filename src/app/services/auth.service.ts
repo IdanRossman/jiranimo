@@ -107,24 +107,17 @@ export class AuthService {
    * Handle OAuth callback with session ID from URL
    */
   handleCallback(sessionId: string): void {
-    console.log('=== AUTH SERVICE: handleCallback ===');
-    console.log('Received session ID:', sessionId);
-
     // Store session ID as access token
     const tokens: AuthTokens = {
       accessToken: sessionId
     };
     this.storeTokens(tokens);
-    console.log('Session ID stored in localStorage');
 
     this.isAuthenticatedSubject.next(true);
-    console.log('Authentication state set to true');
 
     // Fetch user info after storing session
-    console.log('Fetching user info from backend...');
     this.fetchUserInfo().subscribe({
       next: (user) => {
-        console.log('User info fetched successfully:', user);
       },
       error: (err) => {
         console.error('Failed to fetch user info:', err);

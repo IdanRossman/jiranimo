@@ -9,6 +9,9 @@ import { GlassButtonComponent } from '../../components/glass-button/glass-button
 import { IssuesSidebarComponent } from '../../components/issues-sidebar/issues-sidebar.component';
 import { AiChatSidebarComponent } from '../../components/ai-chat-sidebar/ai-chat-sidebar.component';
 import { IssueCardComponent } from '../../components/issue-card/issue-card.component';
+import { IssueFilterBarComponent } from '../../components/shared/issue-filter-bar/issue-filter-bar.component';
+import { IssueDetailModalComponent } from '../../components/issue-detail-modal/issue-detail-modal.component';
+import { LoadingSpinnerComponent } from '../../components/shared/loading-spinner/loading-spinner.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { environment } from '../../../environments/environment';
 
@@ -21,7 +24,7 @@ interface KanbanColumn {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, FormsModule, GlassButtonComponent, IssuesSidebarComponent, AiChatSidebarComponent, IssueCardComponent, NgxChartsModule, DragDropModule, MatIconModule],
+  imports: [CommonModule, FormsModule, IssuesSidebarComponent, AiChatSidebarComponent, IssueCardComponent, IssueFilterBarComponent, IssueDetailModalComponent, LoadingSpinnerComponent, NgxChartsModule, DragDropModule, MatIconModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -44,8 +47,8 @@ export class DashboardComponent implements OnInit {
   // Issue detail modal
   selectedIssue: JiraIssue | null = null;
   showDetailModal = false;
-  modalAnimationState: 'opening' | 'open' | 'closing' | 'closed' = 'closed';
   cardPosition: { top: number; left: number; width: number; height: number } | null = null;
+  private closeTimeout: any = null;
 
   // Kanban board
   kanbanColumns: KanbanColumn[] = [
@@ -55,11 +58,13 @@ export class DashboardComponent implements OnInit {
     { id: 'done', title: 'DONE', statusNames: ['Done', 'Resolved', 'Closed'], issues: [] }
   ];
   projects: { key: string; name: string; color: string; visible: boolean }[] = [];
+  selectedProjects: string[] = [];
   showProjectFilter = false;
   searchQuery = '';
   filteredIssues: JiraIssue[] = [];
   selectedPriority = '';
   selectedType = '';
+  selectedTypes: string[] = [];
   availablePriorities: string[] = [];
   availableTypes: string[] = [];
 
@@ -84,12 +89,10 @@ export class DashboardComponent implements OnInit {
 
   loadData() {
     this.loading = true;
-    console.log('📊 Dashboard: Loading data...');
 
     // Load current user
     this.jiraService.getCurrentUser().subscribe({
       next: (user) => {
-        console.log('✅ Dashboard: Current user loaded', user);
         this.currentUser = user;
       },
       error: (err) => {
@@ -100,19 +103,14 @@ export class DashboardComponent implements OnInit {
     // Load all issues
     this.jiraService.getMyIssues().subscribe({
       next: (response) => {
-        console.log('✅ Dashboard: Response loaded', response);
         this.allIssues = response.issues;
         this.issuesRequiringAttention = response.issuesRequiringAttention || [];
-        console.log('📈 Dashboard: Total issues count:', this.allIssues.length);
-        console.log('⚠️ Dashboard: Issues requiring attention:', this.issuesRequiringAttention.length);
-        if (this.allIssues.length > 0) {
-          console.log('📝 Dashboard: First issue structure:', this.allIssues[0]);
-        }
         this.loading = false;
         this.updateGrouping();
         this.updateChartData();
         this.initializeKanbanBoard();
         this.extractAvailableFilters();
+        this.calculateSummary(); // Calculate summary from loaded issues
         // Trigger fade-in animation after a brief delay
         setTimeout(() => {
           this.dashboardLoaded = true;
@@ -124,47 +122,103 @@ export class DashboardComponent implements OnInit {
         this.loading = false;
       }
     });
-
-    // Load summary stats
-    this.jiraService.getIssueSummary().subscribe({
-      next: (summary) => {
-        console.log('✅ Dashboard: Summary loaded', summary);
-        this.summary = summary;
-      },
-      error: (err) => {
-        console.error('❌ Dashboard: Error loading summary', err);
-      }
-    });
   }
 
   updateGrouping() {
+    // Use already loaded issues instead of fetching again
+    if (this.allIssues.length === 0) return;
+
     switch (this.groupBy) {
       case 'status':
-        this.jiraService.getIssuesGroupedByStatus().subscribe(grouped => {
-          this.issuesByStatus = grouped;
-          this.nestedIssues = {};
-        });
+        this.issuesByStatus = this.groupIssuesByStatus(this.allIssues);
+        this.nestedIssues = {};
         break;
       case 'project':
-        this.jiraService.getIssuesGroupedByProject().subscribe(grouped => {
-          this.issuesByStatus = grouped;
-          this.nestedIssues = {};
-        });
+        this.issuesByStatus = this.groupIssuesByProject(this.allIssues);
+        this.nestedIssues = {};
         break;
       case 'priority':
-        this.jiraService.getIssuesGroupedByPriority().subscribe(grouped => {
-          this.issuesByStatus = grouped;
-          this.nestedIssues = {};
-        });
+        this.issuesByStatus = this.groupIssuesByPriority(this.allIssues);
+        this.nestedIssues = {};
         break;
       case 'epic':
         // Use nested grouping for epics
-        this.jiraService.getIssuesGroupedByEpicAndType().subscribe(nested => {
-          this.nestedIssues = nested;
-          this.issuesByStatus = {};
-        });
+        this.nestedIssues = this.groupIssuesByEpicAndType(this.allIssues);
+        this.issuesByStatus = {};
         break;
     }
+  }
+
+  // Local grouping methods (no HTTP calls)
+  private groupIssuesByStatus(issues: JiraIssue[]): GroupedIssues {
+    const grouped: GroupedIssues = {};
+    issues.forEach(issue => {
+      const status = issue.status.name;
+      if (!grouped[status]) grouped[status] = [];
+      grouped[status].push(issue);
+    });
+    return grouped;
+  }
+
+  private groupIssuesByProject(issues: JiraIssue[]): GroupedIssues {
+    const grouped: GroupedIssues = {};
+    issues.forEach(issue => {
+      const project = issue.project.name;
+      if (!grouped[project]) grouped[project] = [];
+      grouped[project].push(issue);
+    });
+    return grouped;
+  }
+
+  private groupIssuesByPriority(issues: JiraIssue[]): GroupedIssues {
+    const grouped: GroupedIssues = {};
+    issues.forEach(issue => {
+      const priority = issue.priority?.name || 'No Priority';
+      if (!grouped[priority]) grouped[priority] = [];
+      grouped[priority].push(issue);
+    });
+    return grouped;
+  }
+
+  private groupIssuesByEpicAndType(issues: JiraIssue[]): NestedGroupedIssues {
+    const nested: NestedGroupedIssues = {};
+    issues.forEach(issue => {
+      const epicName = issue.epic?.name ?? 'No Epic';
+      const issueType = issue.type.name;
+
+      if (!nested[epicName]) nested[epicName] = {};
+      if (!nested[epicName][issueType]) nested[epicName][issueType] = [];
+      nested[epicName][issueType].push(issue);
+    });
+    return nested;
+  }
+
+  private calculateSummary() {
+    if (this.allIssues.length === 0) {
+      this.summary = null;
+      return;
+    }
+
+    this.summary = {
+      total: this.allIssues.length,
+      byStatus: {},
+      byPriority: {},
+      byProject: {}
+    };
+
+    this.allIssues.forEach(issue => {
+      // Count by status
+      const status = issue.status?.name || 'No Status';
+      this.summary!.byStatus[status] = (this.summary!.byStatus[status] || 0) + 1;
+
+      // Count by priority
+      const priority = issue.priority?.name || 'No Priority';
+      this.summary!.byPriority[priority] = (this.summary!.byPriority[priority] || 0) + 1;
+
+      // Count by project
+      const project = issue.project?.name || 'No Project';
+      this.summary!.byProject[project] = (this.summary!.byProject[project] || 0) + 1;
+    });
   }
 
   changeGrouping(groupBy: 'status' | 'project' | 'priority' | 'epic') {
@@ -214,6 +268,12 @@ export class DashboardComponent implements OnInit {
     const cardElement = (event.currentTarget as HTMLElement);
     const rect = cardElement.getBoundingClientRect();
 
+    // Clear any pending close timeout
+    if (this.closeTimeout) {
+      clearTimeout(this.closeTimeout);
+      this.closeTimeout = null;
+    }
+
     // Store card position for animation
     this.cardPosition = {
       top: rect.top,
@@ -224,35 +284,16 @@ export class DashboardComponent implements OnInit {
 
     this.selectedIssue = issue;
     this.showDetailModal = true;
-    this.modalAnimationState = 'opening';
-
-    // Transition to open state after animation completes
-    setTimeout(() => {
-      this.modalAnimationState = 'open';
-    }, 500); // Match the animation duration (0.5s)
   }
 
   closeIssueDetail() {
-    this.modalAnimationState = 'closing';
-
-    setTimeout(() => {
-      this.showDetailModal = false;
-      this.modalAnimationState = 'closed';
+    this.showDetailModal = false;
+    
+    this.closeTimeout = setTimeout(() => {
+      this.selectedIssue = null;
       this.cardPosition = null;
-      setTimeout(() => {
-        this.selectedIssue = null;
-      }, 100);
+      this.closeTimeout = null;
     }, 400); // Wait for closing animation
-  }
-
-  getJiraUrl(issue: JiraIssue): string {
-    // Use the configured Jira base URL from environment
-    return `${environment.jiraBaseUrl}/browse/${issue.key}`;
-  }
-
-  openInJira(issue: JiraIssue) {
-    const url = this.getJiraUrl(issue);
-    window.open(url, '_blank');
   }
 
   getEpicTotalCount(epicName: string): number {
@@ -275,26 +316,6 @@ export class DashboardComponent implements OnInit {
       name,
       value
     }));
-  }
-
-  /**
-   * Extract plain text from Atlassian Document Format
-   */
-  getDescriptionText(description: any): string {
-    if (!description || !description.content) return 'No description';
-    let text = '';
-    const extractText = (content: any[]): void => {
-      content.forEach((item: any) => {
-        if (item.text) {
-          text += item.text + ' ';
-        }
-        if (item.content) {
-          extractText(item.content);
-        }
-      });
-    };
-    extractText(description.content);
-    return text.trim() || 'No description';
   }
 
   onSidebarCollapsedChange(collapsed: boolean) {
@@ -325,6 +346,9 @@ export class DashboardComponent implements OnInit {
     });
 
     this.projects = Array.from(projectMap.values()).map(p => ({ ...p, visible: true }));
+    
+    // Initialize selectedProjects with all projects
+    this.selectedProjects = this.projects.map(p => p.key);
 
     // Distribute issues to columns based on status
     this.allIssues.forEach(issue => {
@@ -351,6 +375,18 @@ export class DashboardComponent implements OnInit {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
       // Move between columns
+      const issue = event.previousContainer.data[event.previousIndex];
+      const targetColumn = this.kanbanColumns.find(col => col.issues === event.container.data);
+      
+      if (!targetColumn) {
+        console.error('❌ Could not find target column');
+        return;
+      }
+
+      // Get the first status name from the target column (primary status)
+      const newStatusName = targetColumn.statusNames[0];
+      
+      // Optimistically update UI
       transferArrayItem(
         event.previousContainer.data,
         event.container.data,
@@ -358,10 +394,24 @@ export class DashboardComponent implements OnInit {
         event.currentIndex
       );
 
-      // TODO: Update issue status in Jira API
-      const issue = event.container.data[event.currentIndex];
-      console.log('🔄 Issue moved:', issue.key, 'to column:', event.container.id);
-      // Future: Call Jira API to update status
+      // Update issue status in Jira
+      this.jiraService.updateIssueStatus(issue.key, newStatusName).subscribe({
+        next: () => {
+          // Update the local issue object
+          issue.status.name = newStatusName;
+        },
+        error: (err) => {
+          console.error(`❌ Failed to update ${issue.key} status:`, err);
+          // Revert the UI change on error
+          transferArrayItem(
+            event.container.data,
+            event.previousContainer.data,
+            event.currentIndex,
+            event.previousIndex
+          );
+          alert(`Failed to update issue status: ${err.error?.message || err.message}`);
+        }
+      });
     }
   }
 
@@ -374,23 +424,23 @@ export class DashboardComponent implements OnInit {
     this.showProjectFilter = !this.showProjectFilter;
   }
 
-  toggleProjectVisibility(projectKey: string) {
-    const project = this.projects.find(p => p.key === projectKey);
-    if (project) {
-      project.visible = !project.visible;
-      this.filterKanbanByProjects();
-    }
+  onProjectsChange(projectKeys: string[]) {
+    this.selectedProjects = projectKeys;
+    this.filterKanbanByProjects();
   }
 
   filterKanbanByProjects() {
-    const visibleProjectKeys = this.projects.filter(p => p.visible).map(p => p.key);
+    // If no projects selected, show all
+    const visibleProjectKeys = this.selectedProjects.length > 0 
+      ? this.selectedProjects 
+      : this.projects.map(p => p.key);
     
     this.kanbanColumns.forEach(column => {
       column.issues = this.allIssues.filter(issue => {
         // Skip done issues
         if (issue.status.categoryKey === 'done') return false;
         
-        // Filter by project visibility
+        // Filter by project selection
         if (!visibleProjectKeys.includes(issue.project.key)) return false;
 
         // Check if issue belongs to this column
@@ -459,9 +509,16 @@ export class DashboardComponent implements OnInit {
       );
     }
 
+    // Apply multiselect type filter
+    if (this.selectedTypes.length > 0) {
+      filtered = filtered.filter(issue => 
+        this.selectedTypes.includes(issue.type.name)
+      );
+    }
+
     this.filteredIssues = filtered;
     
-    if (this.searchQuery.trim() || this.selectedPriority || this.selectedType) {
+    if (this.searchQuery.trim() || this.selectedPriority || this.selectedType || this.selectedTypes.length > 0) {
       this.filterKanbanBySearch();
     } else {
       this.filterKanbanByProjects();
@@ -472,6 +529,7 @@ export class DashboardComponent implements OnInit {
     this.searchQuery = '';
     this.selectedPriority = '';
     this.selectedType = '';
+    this.selectedTypes = [];
     this.filteredIssues = [...this.allIssues];
     this.filterKanbanByProjects();
     this.extractAvailableFilters();
@@ -498,14 +556,17 @@ export class DashboardComponent implements OnInit {
   }
 
   filterKanbanBySearch() {
-    const visibleProjectKeys = this.projects.filter(p => p.visible).map(p => p.key);
+    // If no projects selected, show all
+    const visibleProjectKeys = this.selectedProjects.length > 0 
+      ? this.selectedProjects 
+      : this.projects.map(p => p.key);
     
     this.kanbanColumns.forEach(column => {
       column.issues = this.filteredIssues.filter(issue => {
         // Skip done issues
         if (issue.status.categoryKey === 'done') return false;
         
-        // Filter by project visibility
+        // Filter by project selection
         if (!visibleProjectKeys.includes(issue.project.key)) return false;
 
         // Check if issue belongs to this column

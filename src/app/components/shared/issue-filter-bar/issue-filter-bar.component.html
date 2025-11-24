@@ -1,0 +1,50 @@
+<div class="search-filter-bar">
+  <!-- Search Input -->
+  <div class="filter-control-wrapper">
+    <label class="filter-label">Search</label>
+    <app-search-input
+      placeholder="Search issues..."
+      [value]="searchQuery"
+      (valueChange)="onSearchChange($event)"
+      (clear)="onSearchClear()">
+    </app-search-input>
+  </div>
+
+  <!-- Priority Filter -->
+  <div class="filter-control-wrapper">
+    <label class="filter-label">Priority</label>
+    <app-filter-multiselect
+      icon="flag"
+      placeholder="All Priorities"
+      [options]="priorityOptions"
+      [selectedValue]="selectedPriority"
+      (selectedValueChange)="onPriorityChange($event)">
+    </app-filter-multiselect>
+  </div>
+
+  <!-- Type Filter -->
+  <div class="filter-control-wrapper">
+    <label class="filter-label">Type</label>
+    <app-filter-multiselect
+      icon="label"
+      placeholder="All Types"
+      [options]="typeOptions"
+      [selectedValues]="selectedTypes"
+      (selectedValuesChange)="onTypesChange($event)"
+      [multiselect]="true">
+    </app-filter-multiselect>
+  </div>
+
+  <!-- Projects Filter -->
+  <div class="filter-control-wrapper">
+    <label class="filter-label">Projects</label>
+    <app-filter-multiselect
+      icon="folder"
+      placeholder="All Projects"
+      [options]="projectOptions"
+      [selectedValues]="selectedProjects"
+      (selectedValuesChange)="onProjectsChange($event)"
+      [multiselect]="true">
+    </app-filter-multiselect>
+  </div>
+</div>

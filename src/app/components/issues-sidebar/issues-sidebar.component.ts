@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { IssueRequiringAttention } from '../../models/jira.models';
@@ -12,7 +12,7 @@ import { gsap } from 'gsap';
   templateUrl: './issues-sidebar.component.html',
   styleUrl: './issues-sidebar.component.css'
 })
-export class IssuesSidebarComponent implements AfterViewInit, OnDestroy {
+export class IssuesSidebarComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() issuesRequiringAttention: IssueRequiringAttention[] = [];
   @Output() collapsedChange = new EventEmitter<boolean>();
 
@@ -24,26 +24,46 @@ export class IssuesSidebarComponent implements AfterViewInit, OnDestroy {
   @ViewChild('toggleBtn') toggleBtnElement!: ElementRef;
 
   isCollapsed = true;
+  shouldPulse = false;
   private isAnimating = false;
+  private hasInitialized = false;
+
+  ngOnChanges(changes: SimpleChanges) {
+    // When issues first load, auto-expand if there are issues
+    if (changes['issuesRequiringAttention'] && this.hasInitialized) {
+      const currentIssues = changes['issuesRequiringAttention'].currentValue;
+      const previousIssues = changes['issuesRequiringAttention'].previousValue;
+      
+      // Auto-expand when issues first arrive
+      if ((!previousIssues || previousIssues.length === 0) && 
+          currentIssues && 
+          currentIssues.length > 0 && 
+          this.isCollapsed) {
+        setTimeout(() => {
+          this.expand();
+        }, 150);
+      }
+    }
+  }
 
   ngAfterViewInit() {
     // Initialize in collapsed state - set initial positions without animation
-    if (this.sidebarElement && this.collapsedStripElement) {
-      gsap.set(this.sidebarElement.nativeElement, {
-        width: 50
-      });
-      gsap.set(this.collapsedStripElement.nativeElement, {
-        opacity: 1,
-        x: 0
-      });
-      gsap.set(this.sidebarContentElement.nativeElement, {
-        opacity: 0
-      });
-      gsap.set([this.sidebarHeaderElement.nativeElement, this.issuesListElement.nativeElement], {
-        x: -30,
-        opacity: 0
-      });
-    }
+    gsap.set(this.sidebarElement.nativeElement, {
+      width: 50
+    });
+    gsap.set(this.collapsedStripElement.nativeElement, {
+      opacity: 1,
+      x: 0
+    });
+    gsap.set(this.sidebarContentElement.nativeElement, {
+      opacity: 0
+    });
+    gsap.set([this.sidebarHeaderElement.nativeElement, this.issuesListElement.nativeElement], {
+      x: -30,
+      opacity: 0
+    });
+    
+    this.hasInitialized = true;
   }
 
   toggleSidebar() {
@@ -62,7 +82,12 @@ export class IssuesSidebarComponent implements AfterViewInit, OnDestroy {
     const timeline = gsap.timeline({
       onStart: () => {
         this.isCollapsed = false;
+        this.shouldPulse = true;
         this.collapsedChange.emit(false);
+        // Reset pulse after animation completes (4 iterations of 0.8s)
+        setTimeout(() => {
+          this.shouldPulse = false;
+        }, 3200);
       },
       onComplete: () => {
         this.isAnimating = false;

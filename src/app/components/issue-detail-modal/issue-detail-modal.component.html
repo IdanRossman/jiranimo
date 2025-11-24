@@ -1,0 +1,107 @@
+<div *ngIf="showModal && issue" class="modal-overlay"
+     [class.modal-opening]="modalAnimationState === 'opening'"
+     [class.modal-closing]="modalAnimationState === 'closing'"
+     (click)="closeModal()">
+  <div class="modal-content glass-card"
+       [class.modal-opening]="modalAnimationState === 'opening'"
+       [class.modal-open]="modalAnimationState === 'open'"
+       [class.modal-closing]="modalAnimationState === 'closing'"
+       [style.--card-top.px]="cardPosition?.top"
+       [style.--card-left.px]="cardPosition?.left"
+       [style.--card-width.px]="cardPosition?.width"
+       [style.--card-height.px]="cardPosition?.height"
+       (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="modal-title-section">
+        <span class="modal-issue-key">{{ issue.key }}</span>
+        <h2 class="modal-title">{{ issue.summary }}</h2>
+      </div>
+      <button class="modal-close" (click)="closeModal()">×</button>
+    </div>
+
+    <!-- Modal Actions -->
+    <div class="modal-actions">
+      <app-glass-button
+        variant="primary"
+        (click)="openInJira(issue)">
+        Open in Jira
+      </app-glass-button>
+      <div class="modal-meta">
+        <span class="meta-badge" [style.background-color]="getStatusColor(issue.status.categoryKey)">
+          {{ issue.status.name }}
+        </span>
+        <span class="meta-badge priority" [style.color]="getPriorityColor(issue.priority?.name || 'No Priority')">
+          {{ issue.priority?.name || 'No Priority' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+      
+      <!-- Description -->
+      <div class="detail-section" *ngIf="issue.description">
+        <h3 class="section-title">Description</h3>
+        <p class="section-content">{{ getDescriptionText(issue.description) }}</p>
+      </div>
+
+      <!-- Additional Info -->
+      <div class="detail-section">
+        <h3 class="section-title">Details</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Project:</span>
+            <span class="detail-value">{{ issue.project.name }}</span>
+          </div>
+          <div class="detail-item" *ngIf="issue.epic">
+            <span class="detail-label">Epic:</span>
+            <span class="detail-value">{{ issue.epic.name }}</span>
+          </div>
+          <div class="detail-item" *ngIf="issue.assignee">
+            <span class="detail-label">Assignee:</span>
+            <span class="detail-value">{{ issue.assignee.displayName }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Reporter:</span>
+            <span class="detail-value">{{ issue.reporter.displayName }}</span>
+          </div>
+          <div class="detail-item" *ngIf="issue.storyPoints">
+            <span class="detail-label">Story Points:</span>
+            <span class="detail-value">{{ issue.storyPoints }}</span>
+          </div>
+          <div class="detail-item" *ngIf="issue.dueDate">
+            <span class="detail-label">Due Date:</span>
+            <span class="detail-value">{{ issue.dueDate | date:'MMM d, y' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subtasks -->
+      <div class="detail-section" *ngIf="issue.subtasks && issue.subtasks.length > 0">
+        <h3 class="section-title">Subtasks ({{ issue.subtasks.length }})</h3>
+        <div class="subtask-list">
+          <div *ngFor="let subtask of issue.subtasks" class="subtask-item">
+            <span class="subtask-key">{{ subtask.key }}</span>
+            <span class="subtask-summary">{{ subtask.summary }}</span>
+            <span class="subtask-status" [style.background-color]="getStatusColor(subtask.status.categoryKey)">
+              {{ subtask.status.name }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Labels -->
+      <div class="detail-section" *ngIf="issue.labels && issue.labels.length > 0">
+        <h3 class="section-title">Labels</h3>
+        <div class="labels-list">
+          <span *ngFor="let label of issue.labels" class="label-tag">
+            {{ label }}
+          </span>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>

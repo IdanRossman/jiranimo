@@ -294,6 +294,5 @@ export class HeroContentComponent implements OnInit, OnDestroy, AfterViewInit {
 
   learnMore() {
     // TODO: Navigate to learn more page or show modal
-    console.log('Learn more clicked');
   }
 }

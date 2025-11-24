@@ -18,7 +18,7 @@
 
     <!-- Header -->
     <div class="sidebar-header" #sidebarHeader>
-      <div class="header-icon">
+      <div class="header-icon" [class.pulse]="shouldPulse">
         <mat-icon class="warning-icon">warning</mat-icon>
       </div>
       <div class="header-content">

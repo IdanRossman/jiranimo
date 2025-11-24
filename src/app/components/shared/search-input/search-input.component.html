@@ -1,0 +1,12 @@
+<div class="search-glass-bar">
+  <mat-icon class="search-icon">search</mat-icon>
+  <input
+    type="text"
+    class="search-input"
+    [placeholder]="placeholder"
+    [value]="value"
+    (input)="onInput($event)">
+  <button *ngIf="value" class="search-clear" (click)="onClear()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>

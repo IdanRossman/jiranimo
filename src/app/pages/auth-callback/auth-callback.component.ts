@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { LoadingSpinnerComponent } from '../../components/shared/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-auth-callback',
-  imports: [CommonModule],
+  imports: [CommonModule, LoadingSpinnerComponent],
   templateUrl: './auth-callback.component.html',
   styleUrl: './auth-callback.component.css'
 })

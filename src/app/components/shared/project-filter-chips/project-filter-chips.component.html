@@ -1,0 +1,12 @@
+<div class="project-filter-glass-container">
+  <button
+    *ngFor="let project of projects"
+    class="project-filter-chip-inline"
+    [class.active]="project.visible"
+    [style.--project-color]="project.color"
+    [style.--project-color-rgb]="hexToRgb(project.color)"
+    (click)="onToggle(project.key)">
+    <span class="project-dot" [style.background-color]="project.color"></span>
+    <span class="project-label">{{ project.name }}</span>
+  </button>
+</div>

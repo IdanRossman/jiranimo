@@ -1,0 +1,8 @@
+<div class="loading-container" [class.size-small]="size === 'small'" [class.size-large]="size === 'large'">
+  <div class="spinner-logo">
+    <img src="/bro.svg" alt="Loading" class="bro-logo">
+  </div>
+  @if (message) {
+    <p class="loading-message">{{ message }}</p>
+  }
+</div>

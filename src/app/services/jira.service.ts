@@ -24,22 +24,8 @@ export class JiraService {
    * Get all issues assigned to the current user (excluding done items)
    */
   getMyIssues(): Observable<JiraSearchResponse> {
-    console.log('🔍 Fetching issues from API:', `${this.API_URL}/issues/assigned-to-me`);
-
     return this.http.get<any>(`${this.API_URL}/issues/assigned-to-me`).pipe(
-      map(response => this.transformApiResponse(response)),
-      tap(response => {
-        console.log('📦 Transformed Response:', response);
-        console.log('📊 Response Type:', typeof response);
-        console.log('🔑 Response Keys:', Object.keys(response));
-        if (response.issues) {
-          console.log('✅ Issues array length:', response.issues.length);
-          console.log('📝 First issue sample:', response.issues[0]);
-        }
-        if (response.issuesRequiringAttention) {
-          console.log('⚠️ Issues requiring attention:', response.issuesRequiringAttention.length);
-        }
-      })
+      map(response => this.transformApiResponse(response))
     );
   }
 
@@ -179,14 +165,7 @@ export class JiraService {
    * Get current user info
    */
   getCurrentUser(): Observable<JiraUser> {
-    console.log('🔍 Fetching current user from API:', `${this.API_URL}/user/me`);
-
-    return this.http.get<JiraUser>(`${this.API_URL}/user/me`).pipe(
-      tap(user => {
-        console.log('👤 Current User Response:', user);
-        console.log('🔑 User Keys:', Object.keys(user));
-      })
-    );
+    return this.http.get<JiraUser>(`${this.API_URL}/user/me`);
   }
 
   /**
@@ -419,5 +398,14 @@ export class JiraService {
     });
 
     return nested;
+  }
+
+  /**
+   * Update the status of an issue
+   */
+  updateIssueStatus(issueKey: string, newStatusName: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/issues/${issueKey}/transition`, {
+      statusName: newStatusName
+    });
   }
 }
