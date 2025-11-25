@@ -17,10 +17,12 @@
 
   <!-- Loading State -->
   @if (loading) {
-    <app-loading-spinner 
-      message="Loading your issues..."
-      size="large">
-    </app-loading-spinner>
+    <div class="loading-container">
+      <app-loading-spinner 
+        message="Loading your issues..."
+        size="large">
+      </app-loading-spinner>
+    </div>
   }
 
   <!-- Kanban Board -->
@@ -31,14 +33,18 @@
       [(selectedPriority)]="selectedPriority"
       [(selectedTypes)]="selectedTypes"
       [(selectedProjects)]="selectedProjects"
+      [(selectedLabels)]="selectedLabels"
       [availablePriorities]="availablePriorities"
       [availableTypes]="availableTypes"
+      [availableLabels]="availableLabels"
       [projects]="projects"
       (searchQueryChange)="onSearchChange()"
       (searchClear)="clearSearch()"
       (selectedPriorityChange)="onFilterChange()"
       (selectedTypesChange)="onFilterChange()"
-      (selectedProjectsChange)="onProjectsChange($event)">
+      (selectedProjectsChange)="onProjectsChange($event)"
+      (selectedLabelsChange)="onFilterChange()"
+      (refresh)="refreshIssues()">
     </app-issue-filter-bar>
 
     <!-- Divider -->
@@ -64,31 +70,17 @@
         <div class="column-content">
           <div
             *ngFor="let issue of column.issues"
-            class="kanban-card"
-            [style.--project-color]="getProjectColor(issue)"
-            [style.--project-color-rgb]="getProjectColorRgb(issue)"
-            (click)="openIssueDetail(issue, $event)"
             cdkDrag>
             
             <!-- Drag Placeholder -->
             <div class="kanban-card-placeholder" *cdkDragPlaceholder></div>
 
             <!-- Card Content -->
-            <div class="card-header">
-              <span class="issue-key">{{ issue.key }}</span>
-              <span class="issue-priority" [style.color]="getPriorityColor(issue.priority?.name || 'Medium')">
-                {{ issue.priority?.name || 'Medium' }}
-              </span>
-            </div>
-
-            <h4 class="issue-summary">{{ issue.summary }}</h4>
-
-            <div class="card-footer">
-              <span class="project-tag" [style.background-color]="getProjectColor(issue)">
-                {{ issue.project.key }}
-              </span>
-              <span class="issue-type">{{ issue.type.name }}</span>
-            </div>
+            <app-issue-card
+              [issue]="issue"
+              [showEpic]="true"
+              (issueClick)="openIssueDetail($event.issue, $event.event)">
+            </app-issue-card>
           </div>
 
           <!-- Empty Column State -->

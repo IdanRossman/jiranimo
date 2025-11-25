@@ -26,15 +26,66 @@
 /* Issue Header */
 .issue-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
-.issue-key {
+.hierarchy-path {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 1000;
+}
+
+.hierarchy-icon {
+  font-size: 15px !important;
+  width: 15px !important;
+  height: 15px !important;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  margin-right: 0.15rem;
+}
+
+.hierarchy-link {
+  text-decoration: none;
   font-family: monospace;
   font-weight: 600;
+  transition: all 0.2s ease;
+  position: relative;
+  padding: 0.1rem 0;
+}
+
+.hierarchy-link:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.hierarchy-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.2s ease;
+}
+
+.hierarchy-link:hover::after {
+  width: 100%;
+}
+
+
+.separator {
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-weight: 300;
+  opacity: 0.4;
+  font-size: 0.85rem;
+  margin: 0 0.1rem;
 }
 
 .issue-priority {
@@ -44,9 +95,14 @@
   letter-spacing: 0.5px;
 }
 
+.priority-badge {
+  display: flex;
+  align-items: center;
+}
+
 /* Issue Title */
 .issue-title {
-  font-size: 1.1rem;
+  font-size: 1.0rem;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
@@ -98,18 +154,38 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
+  max-width: 320px;
 }
 
 /* Issue Footer */
 .issue-footer {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
+  justify-content: space-between;
   align-items: center;
   padding-top: 0.75rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 0.85rem;
+  gap: 1rem;
+}
+
+.footer-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  flex: 1;
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.type-name {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .assignee {
@@ -126,10 +202,15 @@
   border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
-.labels {
+.labels-container {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .label {
@@ -138,6 +219,7 @@
   border-radius: 12px;
   font-size: 0.75rem;
   color: var(--text-primary);
+  white-space: nowrap;
 }
 
 .label-more {
@@ -146,6 +228,7 @@
   border-radius: 12px;
   font-size: 0.75rem;
   color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .subtasks {

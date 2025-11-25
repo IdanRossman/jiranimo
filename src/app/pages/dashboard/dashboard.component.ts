@@ -67,6 +67,8 @@ export class DashboardComponent implements OnInit {
   selectedTypes: string[] = [];
   availablePriorities: string[] = [];
   availableTypes: string[] = [];
+  selectedLabels: string[] = [];
+  availableLabels: string[] = [];
 
   // Chart data
   epicChartData: any[] = [];
@@ -516,9 +518,16 @@ export class DashboardComponent implements OnInit {
       );
     }
 
+    // Apply labels filter
+    if (this.selectedLabels.length > 0) {
+      filtered = filtered.filter(issue => 
+        issue.labels && issue.labels.some(label => this.selectedLabels.includes(label))
+      );
+    }
+
     this.filteredIssues = filtered;
     
-    if (this.searchQuery.trim() || this.selectedPriority || this.selectedType || this.selectedTypes.length > 0) {
+    if (this.searchQuery.trim() || this.selectedPriority || this.selectedType || this.selectedTypes.length > 0 || this.selectedLabels.length > 0) {
       this.filterKanbanBySearch();
     } else {
       this.filterKanbanByProjects();
@@ -541,6 +550,7 @@ export class DashboardComponent implements OnInit {
     
     const priorities = new Set<string>();
     const types = new Set<string>();
+    const labels = new Set<string>();
     
     visibleIssues.forEach(issue => {
       if (issue.priority?.name) {
@@ -549,10 +559,14 @@ export class DashboardComponent implements OnInit {
       if (issue.type?.name) {
         types.add(issue.type.name);
       }
+      if (issue.labels && issue.labels.length > 0) {
+        issue.labels.forEach(label => labels.add(label));
+      }
     });
     
     this.availablePriorities = Array.from(priorities).sort();
     this.availableTypes = Array.from(types).sort();
+    this.availableLabels = Array.from(labels).sort();
   }
 
   filterKanbanBySearch() {
@@ -575,5 +589,9 @@ export class DashboardComponent implements OnInit {
         );
       });
     });
+  }
+
+  refreshIssues() {
+    this.loadData();
   }
 }

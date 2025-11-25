@@ -1,11 +1,28 @@
 <div class="issue-card glass-card" (click)="onCardClick($event)">
   <!-- Issue Header -->
   <div class="issue-header">
-    <span class="issue-key">{{ issue.key }}</span>
+    <div class="hierarchy-path">
+      <a [href]="getProjectUrl()" 
+         (click)="onHierarchyClick($event, 'project')"
+         class="hierarchy-link project-name" 
+         target="_blank">{{ issue.project.key }}</a>
+      <ng-container *ngIf="showEpic && issue.epic">
+        <span class="separator">/</span>
+        <a [href]="getEpicUrl()" 
+           (click)="onHierarchyClick($event, 'epic')"
+           class="hierarchy-link epic-key" 
+           target="_blank">{{ issue.epic.key }}</a>
+      </ng-container>
+      <span class="separator">/</span>
+      <a [href]="getIssueUrl()" 
+         (click)="onHierarchyClick($event, 'issue')"
+         class="hierarchy-link issue-key" 
+         target="_blank">{{ issue.key }}</a>
+    </div>
     <span
-      class="issue-priority"
-      [style.color]="getPriorityColor(issue.priority?.name || 'No Priority')">
-      {{ issue.priority?.name || 'No Priority' }}
+      class="status-badge"
+      [style.background-color]="getStatusColor(issue.status.categoryKey)">
+      {{ issue.status.name }}
     </span>
   </div>
 
@@ -14,53 +31,44 @@
 
   <!-- Issue Meta -->
   <div class="issue-meta">
-    <div class="meta-item">
-      <span class="meta-icon">📁</span>
-      <span>{{ issue.project.key }}</span>
-    </div>
-
-    <div class="meta-item">
-      <span
-        class="status-badge"
-        [style.background-color]="getStatusColor(issue.status.categoryKey)">
-        {{ issue.status.name }}
+    <div class="meta-item labels-container" *ngIf="issue.labels.length > 0">
+      <span *ngFor="let label of issue.labels.slice(0, 3)" class="label">
+        {{ label }}
       </span>
-    </div>
-
-    <div class="meta-item" *ngIf="showEpic && issue.epic">
-      <span class="epic-badge" [style.border-color]="issue.epic.color">
-        {{ issue.epic.name }}
+      <span *ngIf="issue.labels.length > 3" class="label-more">
+        +{{ issue.labels.length - 3 }}
       </span>
-    </div>
-
-    <div class="meta-item" *ngIf="issue.storyPoints">
-      <span class="meta-icon">🎯</span>
-      <span>{{ issue.storyPoints }} pts</span>
     </div>
   </div>
 
   <!-- Issue Footer -->
   <div class="issue-footer">
-    <div class="assignee" *ngIf="issue.assignee">
-      <img
-        [src]="issue.assignee.avatarUrl"
-        [alt]="issue.assignee.displayName"
-        class="avatar">
-      <span>{{ issue.assignee.displayName }}</span>
+    <div class="footer-left">
+      <div class="assignee" *ngIf="issue.assignee">
+        <img
+          [src]="issue.assignee.avatarUrl"
+          [alt]="issue.assignee.displayName"
+          class="avatar">
+        <span>{{ issue.assignee.displayName }}</span>
+      </div>
+
+      <div class="priority-badge" *ngIf="issue.priority">
+        <span
+          class="issue-priority"
+          [style.color]="getPriorityColor(issue.priority.name || 'No Priority')">
+          {{ issue.priority.name || 'No Priority' }}
+        </span>
+      </div>
+
+      <div class="subtasks" *ngIf="issue.subtasks && issue.subtasks.length > 0">
+        <span class="meta-icon">📋</span>
+        <span>{{ issue.subtasks.length }} subtasks</span>
+      </div>
     </div>
 
-    <div class="labels" *ngIf="issue.labels.length > 0">
-      <span *ngFor="let label of issue.labels.slice(0, 2)" class="label">
-        {{ label }}
-      </span>
-      <span *ngIf="issue.labels.length > 2" class="label-more">
-        +{{ issue.labels.length - 2 }}
-      </span>
-    </div>
-
-    <div class="subtasks" *ngIf="issue.subtasks && issue.subtasks.length > 0">
-      <span class="meta-icon">📋</span>
-      <span>{{ issue.subtasks.length }} subtasks</span>
+    <div class="footer-right">
+      <mat-icon class="type-icon">{{ getTypeIcon(issue.type.name) }}</mat-icon>
+      <span class="type-name">{{ issue.type.name }}</span>
     </div>
   </div>
 

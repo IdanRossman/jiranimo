@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 export interface FilterOption {
   label: string;
   value: string;
+  suggested?: boolean;
 }
 
 @Component({
@@ -76,6 +77,10 @@ export class FilterMultiselectComponent {
       return value === '' ? this.selectedValues.length === 0 : this.selectedValues.includes(value);
     }
     return value === '' ? !this.selectedValue : this.selectedValue === value;
+  }
+
+  isSuggested(option: FilterOption): boolean {
+    return option.suggested || false;
   }
 
   get displayValue(): string {

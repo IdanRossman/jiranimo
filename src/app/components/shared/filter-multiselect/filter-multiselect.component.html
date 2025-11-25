@@ -17,9 +17,11 @@
     @for (option of options; track option.value) {
       <div class="filter-option"
       [class.selected]="isSelected(option.value)"
+      [class.suggested]="isSuggested(option)"
       (click)="selectOption(option.value, $event)">
       <mat-icon class="check-icon" *ngIf="multiselect && isSelected(option.value)">check</mat-icon>
-      {{ option.label }}
+      <span class="option-label">{{ option.label }}</span>
+      <mat-icon class="suggested-icon" *ngIf="isSuggested(option)">auto_awesome</mat-icon>
       </div>
     }
   </div>

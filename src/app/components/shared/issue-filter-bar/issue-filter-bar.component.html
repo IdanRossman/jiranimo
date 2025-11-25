@@ -47,4 +47,25 @@
       [multiselect]="true">
     </app-filter-multiselect>
   </div>
+
+  <!-- Labels Filter -->
+  <div class="filter-control-wrapper">
+    <label class="filter-label">Labels</label>
+    <app-filter-multiselect
+      icon="label"
+      placeholder="All Labels"
+      [options]="labelOptions"
+      [selectedValues]="selectedLabels"
+      (selectedValuesChange)="onLabelsChange($event)"
+      [multiselect]="true">
+    </app-filter-multiselect>
+  </div>
+
+  <!-- Refresh Button -->
+  <div class="filter-control-wrapper refresh-wrapper">
+    <label class="filter-label" style="opacity: 0;">Refresh</label>
+    <button class="refresh-button glass-button" (click)="onRefresh()" title="Refresh issues">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
 </div>
